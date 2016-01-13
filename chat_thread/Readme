@@ -1,0 +1,20 @@
+Compilation : make
+Execution : java Server
+
+Le port est affiché au lancement du serveur.
+Connexions : telnet localhost <port>
+
+Architecture : 
+
+Server :
+	- Le serveur contient une liste de sockets.
+	- Le serveur, après s'être initialisé, attend en boucle les connexions des clients.
+	
+Slave : 
+	- Le slave envoie un message de bienvenue.
+	- Puis il s'ajoute à la liste de sockets du serveur.
+	- Il attend ensuite en boucle les messages des clients et les rediffuse à tous les clients.
+	- L'envoi du message quit permet de déconnecter un client.
+	
+
+L'accès à la liste des clients n'est pas synchronisé, mais on vérifie lors des envois de messages que le client soit toujours connecté.
