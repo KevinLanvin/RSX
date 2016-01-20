@@ -18,3 +18,14 @@ Slave :
 	
 
 L'accès à la liste des clients n'est pas synchronisé, mais on vérifie lors des envois de messages que le client soit toujours connecté.
+
+
+Questions :
+
+1. Un thread est créé à chaque nouvelle connexion entrante sur le serveur. Pour cela, la classe Server écoute à l'infini sur le port choisi, et se contente de créer un slave pour chaque connexion entrante.
+
+2. Il faut utiliser l'InputStream de la Socket. On peut ainsi récupérer à l'aide de read() les octets un par un. Si on souhaite récupérer une ligne complète, on peut utiliser un BufferedReader sur cet InputStream et utiliser readLine().
+
+3. Tous les utilisateurs sont enregistrés dans une liste contenue dans la classe Server. Lorsqu'un message est reçu, on itère sur les Sockets de cette liste et on envoie sur leur OutputStream le message reçu en premier lieu. Ici il faudrait veiller à ce qu'il n'y ait pas d'accès concurrent à cette liste, afin de ne pas envoyer le message à quelqu'un qui se déconnecte pendant l'itération.
+
+4. Dans mon implémentation, l'envoi d'un message contenant "quit" permet à un client de fermer la socket qui lui est associée, et donc de se déconnecter. On peut utiliser des méthodes plus poussées qu'un simple contains() pour tester le message destiné à fermer une connexion. L'envoi de ce message entraine la suppression de la socket de la liste des clients disponibles sur le serveur avant la fermeture de cette Socket. On pourrait également écrire dans un fichier de log pour conserver une trace de la déconnexion du client.
