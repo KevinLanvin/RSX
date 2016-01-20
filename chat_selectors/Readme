@@ -1,0 +1,9 @@
+Compilation : make
+Execution 	: java Server
+Fonctionnement : 
+	- Un seul selector
+	- Les channels des clients ont un attachment qui contient un buffer.
+	- Lors de la lecture, les octets lus sont recopiés dans les attachments de tous les clients.
+	- L'écriture vide juste le buffer associé au channel du client concerné.
+	- Si un client n'est pas libre en écriture, son buffer peut s'agrandir jusque 2048 caractères, après, la copie ne s'effectuera plus sur son buffer.
+	
