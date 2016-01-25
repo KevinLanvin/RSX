@@ -1,0 +1,8 @@
+set xrange [1:100000]
+set yrange [0.01:1]
+set logscale x
+set logscale y
+set terminal svg size 350,262 fname 'graph' fsize 10
+set output 'graph'
+
+plot "results.txt" u 1:2 title '1 by 1' with linespoints, "results.txt" u 1:3 title 'All in one' with linespoints

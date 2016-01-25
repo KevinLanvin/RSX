@@ -11,7 +11,7 @@ import java.util.Iterator;
 
 public class Server {
 	public final int port = 7654;
-	public static final int BUFFERSIZE = 512;
+	public static final int BUFFERSIZE = 262144;
 	private Selector selector;
 	private ByteBuffer readBuffer, tempBuffer;
 	private ArrayList<Entry> pendingEcho;
@@ -60,8 +60,10 @@ public class Server {
 		SocketChannel client = channel.accept();
 		System.out.println("Connecting new client");
 		client.configureBlocking(false);
+		ByteBuffer buffer = ByteBuffer.allocate(BUFFERSIZE);
+		client.write(ByteBuffer.wrap("hello\n".getBytes()));
 		client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE,
-				ByteBuffer.allocate(BUFFERSIZE));
+				buffer);
 		System.out.println("New client connected");
 	}
 
@@ -89,18 +91,23 @@ public class Server {
 		}
 		// Si la chaine lue est une commande, on parse l'exécute et on retourne
 		readBuffer.clear();
-		int size = channel.read(readBuffer);
-		if (this.parseCommand(channel))
-			return;
-		// Sinon, on lit normalement et on renvoie à tous les utilisateurs
-		this.resendMessage(size);
+		try {
+			int size = channel.read(readBuffer);
+			if (this.parseCommand(channel))
+				return;
+			// Sinon, on lit normalement et on renvoie à tous les utilisateurs
+			this.resendMessage(size - 1);
+		} catch (IOException e){
+			System.out.println("Client perdu");
+		}
+		
 	}
 
 	/* Special read for pending echo channels */
 	private void readEcho(Entry entry) throws IOException {
 		tempBuffer.clear();
 		int size = entry.channel.read(tempBuffer);
-		entry.decrRemaining(size);
+		entry.decrRemaining(size - 2);
 		entry.output.put(tempBuffer.array(), 0, tempBuffer.position());
 		// Ici on force l'écriture si l'entry a fini de lire (pas bien)
 		if (entry.remaining <= 0) {
@@ -113,7 +120,7 @@ public class Server {
 	private void readAck(Entry entry) throws IOException {
 		tempBuffer.clear();
 		int size = entry.channel.read(tempBuffer);
-		entry.decrRemaining(size);
+		entry.decrRemaining(size - 2);
 		// Ici on force l'écriture si l'entry a fini de lire (pas bien)
 		if (entry.remaining <= 0) {
 			pendingAck.remove(entry);
@@ -125,7 +132,7 @@ public class Server {
 	 * Detects and execute commands, if there is no command, does nothing and
 	 * return false
 	 */
-	private boolean parseCommand(SelectableChannel channel) {
+	private boolean parseCommand(SelectableChannel channel) throws IOException {
 		String command = new String(this.readBuffer.array());
 		if (command.startsWith("/")) {
 			String[] words = command.split(" ");
@@ -133,10 +140,22 @@ public class Server {
 			case "/echo":
 				this.pendingEcho.add(new Entry((SocketChannel) channel, Integer
 						.parseInt(words[1].trim())));
+				try {
+					((SocketChannel) channel).write(ByteBuffer.wrap("echo :\n"
+							.getBytes()));
+				} catch (IOException e) {
+					System.out.println("Parti");
+				}
 				break;
 			case "/ack":
 				this.pendingAck.add(new Entry((SocketChannel) channel, Integer
 						.parseInt(words[1].trim())));
+				try {
+					((SocketChannel) channel).write(ByteBuffer.wrap("ack :\n"
+							.getBytes()));
+				} catch (IOException e) {
+					System.out.println("Parti");
+				}
 				break;
 			default:
 				System.out.println("Wrong command : " + command);
@@ -168,7 +187,11 @@ public class Server {
 			return;
 		}
 		((ByteBuffer) sk.attachment()).flip();
-		((SocketChannel) sk.channel()).write((ByteBuffer) sk.attachment());
+		try {
+			((SocketChannel) sk.channel()).write((ByteBuffer) sk.attachment());
+		} catch (IOException e) {
+			System.out.println("Il est parti");
+		}
 		((ByteBuffer) sk.attachment()).clear();
 	}
 
