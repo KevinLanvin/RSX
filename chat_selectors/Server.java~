@@ -187,7 +187,7 @@ public class Server {
 	 * completed
 	 */
 	private void sendOkMessage(Entry e) throws IOException {
-		String s = "[ok " + e.initialnb + "]\n";
+		String s = "[ok " + e.initialnb + "]";
 		ByteBuffer buffer = ByteBuffer.wrap(s.getBytes());
 		e.channel.write(buffer);
 	}

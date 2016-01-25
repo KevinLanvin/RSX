@@ -5,5 +5,7 @@ Fonctionnement :
 	- Les channels des clients ont un attachment qui contient un buffer.
 	- Lors de la lecture, les octets lus sont recopiés dans les attachments de tous les clients.
 	- L'écriture vide juste le buffer associé au channel du client concerné.
-	- Si un client n'est pas libre en écriture, son buffer peut s'agrandir jusque 2048 caractères, après, la copie ne s'effectuera plus sur son buffer.
+	- La réception d'une commande de la part d'un channel crée une Entry pour celui-ci, et ajoute l'entry à la liste correspondant à la commande choisie.
+	- Si un channel qui a lancé une commande est libre en lecture ou en écriture, il déclenche un read ou un write spécial qui effectue le comportement choisi par la commande tapée en premier lieu.
+	- Une fois la commande achevée, un message est envoyé et l'entry concernant le channel est supprimée. Le channel redevient un utilisateur normal.
 	
