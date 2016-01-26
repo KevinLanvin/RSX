@@ -2,7 +2,7 @@
 
 set number [lindex $argv 2]
 set i 1
-set timeout 5
+set timeout 10
 set string "a"
 spawn telnet [lindex $argv 0] [lindex $argv 1]
 expect "hello"

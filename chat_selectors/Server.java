@@ -11,7 +11,7 @@ import java.util.Iterator;
 
 public class Server {
 	public final int port = 7654;
-	public static final int BUFFERSIZE = 262144;
+	public static final int BUFFERSIZE = 5000000;
 	private Selector selector;
 	private ByteBuffer readBuffer, tempBuffer;
 	private ArrayList<Entry> pendingEcho;
@@ -144,7 +144,7 @@ public class Server {
 					((SocketChannel) channel).write(ByteBuffer.wrap("echo :\n"
 							.getBytes()));
 				} catch (IOException e) {
-					System.out.println("Parti");
+					System.out.println("Parti parce qu'il a fini");
 				}
 				break;
 			case "/ack":
@@ -154,7 +154,7 @@ public class Server {
 					((SocketChannel) channel).write(ByteBuffer.wrap("ack :\n"
 							.getBytes()));
 				} catch (IOException e) {
-					System.out.println("Parti");
+					System.out.println("Parti parce qu'il a fini");
 				}
 				break;
 			default:
@@ -210,7 +210,7 @@ public class Server {
 	 * completed
 	 */
 	private void sendOkMessage(Entry e) throws IOException {
-		String s = "[ok " + e.initialnb + "]\n";
+		String s = "ok " + e.initialnb;
 		ByteBuffer buffer = ByteBuffer.wrap(s.getBytes());
 		e.channel.write(buffer);
 	}
