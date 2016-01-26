@@ -1,5 +1,16 @@
 Compilation : make
 Execution 	: java Server
+
+OU
+
+./one_million_bytes
+
+Cela va compiler , puis exécuter le serveur et envoyer une série de commandes via telnet (préparées avec expect) pour générer un graphe de temps d'utilisation CPU en fonction du nombre d'octets envoyés
+Tous les fichiers indésirables sont supprimés. A la fin de l'opération, seul le graph reste.
+
+make clean supprime les fichiers .class, les fichiers temporaires, et le graph.
+
+
 Fonctionnement : 
 	- Un seul selector
 	- Les channels des clients ont un attachment qui contient un buffer.
