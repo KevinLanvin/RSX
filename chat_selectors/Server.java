@@ -1,6 +1,5 @@
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
@@ -12,7 +11,7 @@ import java.util.Iterator;
 
 public class Server {
 	public final int port = 7654;
-	public static final int BUFFERSIZE = 5000000;
+	public static final int BUFFERSIZE = 2000001;
 	private Selector selector;
 	private ByteBuffer readBuffer, tempBuffer;
 	private ArrayList<Entry> pendingEcho;
@@ -48,10 +47,10 @@ public class Server {
 				it.remove();
 				if (sk.isAcceptable())
 					this.acceptFromChannel((ServerSocketChannel) sk.channel());
-				if (sk.isReadable())
-					this.readFromChannel((SocketChannel) sk.channel());
 				if (sk.isWritable())
 					this.write(sk);
+				if (sk.isReadable())
+					this.readFromChannel((SocketChannel) sk.channel());
 			}
 		}
 	}
@@ -93,10 +92,15 @@ public class Server {
 		readBuffer.clear();
 		try {
 			int size = channel.read(readBuffer);
+			if (size == -1) {
+				System.out.println("End of stream");
+				channel.close();
+				return;
+			}
 			if (this.parseCommand(channel))
 				return;
 			// Sinon, on lit normalement et on renvoie à tous les utilisateurs
-			this.resendMessage(size - 1);
+			this.resendMessage(size);
 			readBuffer.clear();
 		} catch (IOException e) {
 			System.out.println("Client perdu");
@@ -109,8 +113,15 @@ public class Server {
 		try {
 			tempBuffer.clear();
 			int size = entry.channel.read(tempBuffer);
-			entry.decrRemaining(size - 2);
-			entry.output.put(tempBuffer.array(), 0, tempBuffer.position());
+			/* End of stream */
+			if(size == -1){
+				System.out.println("End of stream");
+				entry.channel.close();
+				pendingEcho.remove(entry);
+				return;
+			}
+			entry.decrRemaining(size);
+			entry.output.put(tempBuffer.array(), tempBuffer.position()-size, tempBuffer.position());
 		} catch (IOException e) {
 			System.out.println("Client parti");
 		}
@@ -120,7 +131,7 @@ public class Server {
 	private void readAck(Entry entry) throws IOException {
 		tempBuffer.clear();
 		int size = entry.channel.read(tempBuffer);
-		entry.decrRemaining(size - 2);
+		entry.decrRemaining(size);
 		// Ici on force l'écriture si l'entry a fini de lire (pas bien)
 		if (entry.remaining <= 0) {
 			pendingAck.remove(entry);
@@ -133,9 +144,10 @@ public class Server {
 	 * return false
 	 */
 	private boolean parseCommand(SelectableChannel channel) throws IOException {
-		String command = new String(readBuffer.array());
+		String command = new String(readBuffer.array(), 0,
+				readBuffer.position());
 		System.out.println("Command : " + command);
-		if(command.startsWith("/")){
+		if (command.startsWith("/")) {
 			String[] words = command.split(" ");
 			switch (words[0]) {
 			case "/echo":
@@ -172,13 +184,9 @@ public class Server {
 	private void resendMessage(int size) throws IOException {
 		for (SelectionKey sk : selector.keys())
 			if (sk.attachment() != null) {
-				try {
-					((ByteBuffer) sk.attachment()).put(readBuffer.array(), 0,readBuffer.position());
-				} catch (BufferOverflowException e){
-					((ByteBuffer) sk.attachment()).clear();
-					((ByteBuffer) sk.attachment()).put(readBuffer.array(), 0,readBuffer.position());
-				}
-						
+				((ByteBuffer) sk.attachment()).clear();
+				((ByteBuffer) sk.attachment()).put(readBuffer.array(), 0,
+						size - 1);
 			}
 	}
 
@@ -210,7 +218,6 @@ public class Server {
 			System.out.println("Il a pas attendu");
 			return;
 		}
-		
 		e.output.clear();
 		if (e.remaining <= 0) {
 			this.sendOkMessage(e);
@@ -223,11 +230,11 @@ public class Server {
 	 * completed
 	 */
 	private void sendOkMessage(Entry e) {
-		String s = "ok " + e.initialnb;
+		String s = "ok " + e.initialnb + "\n";
 		ByteBuffer buffer = ByteBuffer.wrap(s.getBytes());
 		try {
 			e.channel.write(buffer);
-		} catch (IOException ex){
+		} catch (IOException ex) {
 			System.out.println("Bah le mec il attend meme pas que ca soit ok");
 		}
 	}

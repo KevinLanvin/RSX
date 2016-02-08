@@ -21,39 +21,39 @@ public class Client {
 	}
 
 	/* Sends Echo command and returns current time */
-	public long sendEcho(int nb) throws IOException{
-		output.write(("/echo " + nb + " \n").getBytes());
+	public long sendEcho(long nb) throws IOException {
+		output.write(("/echo " + nb).getBytes());
 		output.flush();
 		/* read "echo :" message */
-		input.read(buffer);
+		this.waitForString("echo :\n");
 		return System.currentTimeMillis();
 	}
-	
-	/* 
-	 * Sends <nb> bytes to the server <pas> by <pas>
-	 * Returns the time taken to receive the answer 
+
+	/*
+	 * Sends <nb> bytes to the server <pas> by <pas> Returns the time taken to
+	 * receive the answer
 	 */
-	public long sendBytes(int nb,int pas) throws IOException {
-		buffer = new byte[Integer.max(512, nb)];
+	public long sendBytes(int nb, int pas) throws IOException {
+		buffer = new byte[(int) Math.max(nb, 512)];
 		long begin = this.sendEcho(nb);
-		for (int i = 0; i < nb; i+=pas) {
+		for (int i = 0; i < nb; i += pas) {
 			String msg = "";
-			for(int j=0;j<pas;++j)
-				msg+="a";
-			msg += "\n";
+			for (int j = 0; j < pas; ++j)
+				msg += "a";
 			output.write(msg.getBytes());
 			output.flush();
 		}
-		this.waitForOk();
+		for (int i = 0; i < nb; ++i)
+			input.read();
+		this.waitForString("ok " + nb + "\n");
 		return System.currentTimeMillis() - begin;
 	}
-	
-	/* Loops while ok isn't received */
-	private void waitForOk() throws IOException {
+
+	private void waitForString(String expected) throws IOException {
 		String s = new String(buffer);
-		while (!s.contains("ok")) {
-			input.read(buffer);
-			s = new String(buffer);
+		while (!s.contains(expected)) {
+			int size = input.read(buffer);
+			s = new String(buffer, 0, size);
 		}
 	}
 
@@ -64,9 +64,13 @@ public class Client {
 
 	public static void main(String[] args) throws UnknownHostException,
 			IOException {
-		for (int i = 10; i < 2000000; i *= 10) {
+		for (int i = 1; i < 2000000; i *= 2) {
+			System.out.print(i + "\t");
 			Client client = new Client(InetAddress.getLocalHost(), 7654);
-			System.out.println(client.sendBytes(i,5));
+			System.out.print(client.sendBytes(i, 1) + "\t");
+			client.close();
+			client = new Client(InetAddress.getLocalHost(), 7654);
+			System.out.println(client.sendBytes(i, i));
 			client.close();
 		}
 	}
