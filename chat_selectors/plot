@@ -2,8 +2,8 @@ set title "Evolution of CPU time used with increasing amount of data"
 set xrange [1000:1000000]
 set logscale x
 set xlabel "Number of sent bytes"
-set yrange [0.01:500000]
-set ylabel "CPU time used"
+set yrange [0.01:300000]
+set ylabel "Time used (ms)"
 set terminal svg enhanced background rgb 'white' fname 'graph'
 set output 'graph'
 

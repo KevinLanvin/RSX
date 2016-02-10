@@ -58,12 +58,12 @@ public class Server {
 	/* Accept new connection */
 	void acceptFromChannel(ServerSocketChannel channel) throws IOException {
 		SocketChannel client = channel.accept();
-		System.out.println("Connecting new client");
+		//System.out.println("Connecting new client");
 		client.configureBlocking(false);
 		client.write(ByteBuffer.wrap("hello\n".getBytes()));
 		client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE,
 				ByteBuffer.allocate(BUFFERSIZE));
-		System.out.println("New client connected");
+		//System.out.println("New client connected");
 	}
 
 	/* Read from a channel */
@@ -93,7 +93,7 @@ public class Server {
 		try {
 			int size = channel.read(readBuffer);
 			if (size == -1) {
-				System.out.println("End of stream");
+				//System.out.println("End of stream");
 				channel.close();
 				return;
 			}
@@ -103,7 +103,7 @@ public class Server {
 			this.resendMessage(size);
 			readBuffer.clear();
 		} catch (IOException e) {
-			System.out.println("Client perdu");
+			//System.out.println("Client perdu");
 		}
 
 	}
@@ -115,7 +115,7 @@ public class Server {
 			int size = entry.channel.read(tempBuffer);
 			/* End of stream */
 			if(size == -1){
-				System.out.println("End of stream");
+				//System.out.println("End of stream");
 				entry.channel.close();
 				pendingEcho.remove(entry);
 				return;
@@ -123,7 +123,7 @@ public class Server {
 			entry.decrRemaining(size);
 			entry.output.put(tempBuffer.array(), tempBuffer.position()-size, tempBuffer.position());
 		} catch (IOException e) {
-			System.out.println("Client parti");
+			//System.out.println("Client parti");
 		}
 	}
 
@@ -146,7 +146,7 @@ public class Server {
 	private boolean parseCommand(SelectableChannel channel) throws IOException {
 		String command = new String(readBuffer.array(), 0,
 				readBuffer.position());
-		System.out.println("Command : " + command);
+		//System.out.println("Command : " + command);
 		if (command.startsWith("/")) {
 			String[] words = command.split(" ");
 			switch (words[0]) {
@@ -157,7 +157,7 @@ public class Server {
 					((SocketChannel) channel).write(ByteBuffer.wrap("echo :\n"
 							.getBytes()));
 				} catch (IOException e) {
-					System.out.println("Parti parce qu'il a fini");
+					//System.out.println("Parti parce qu'il a fini");
 				}
 				break;
 			case "/ack":
@@ -167,7 +167,7 @@ public class Server {
 					((SocketChannel) channel).write(ByteBuffer.wrap("ack :\n"
 							.getBytes()));
 				} catch (IOException e) {
-					System.out.println("Parti parce qu'il a fini");
+					//System.out.println("Parti parce qu'il a fini");
 				}
 				break;
 			default:
@@ -204,7 +204,7 @@ public class Server {
 		try {
 			((SocketChannel) sk.channel()).write((ByteBuffer) sk.attachment());
 		} catch (IOException e) {
-			System.out.println("Il est parti");
+			//System.out.println("Il est parti");
 		}
 		((ByteBuffer) sk.attachment()).clear();
 	}
@@ -215,7 +215,7 @@ public class Server {
 		try {
 			e.channel.write(e.output);
 		} catch (IOException ex) {
-			System.out.println("Il a pas attendu");
+			//System.out.println("Il a pas attendu");
 			return;
 		}
 		e.output.clear();
@@ -235,7 +235,7 @@ public class Server {
 		try {
 			e.channel.write(buffer);
 		} catch (IOException ex) {
-			System.out.println("Bah le mec il attend meme pas que ca soit ok");
+			//System.out.println("Bah le mec il attend meme pas que ca soit ok");
 		}
 	}
 }
