@@ -60,7 +60,6 @@ public class Server {
 		SocketChannel client = channel.accept();
 		//System.out.println("Connecting new client");
 		client.configureBlocking(false);
-		client.write(ByteBuffer.wrap("hello\n".getBytes()));
 		client.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE,
 				ByteBuffer.allocate(BUFFERSIZE));
 		//System.out.println("New client connected");
@@ -111,7 +110,7 @@ public class Server {
 	/* Special read for pending echo channels */
 	private void readEcho(Entry entry) {
 		try {
-			tempBuffer.clear();
+			//tempBuffer.clear();
 			int size = entry.channel.read(tempBuffer);
 			/* End of stream */
 			if(size == -1){
@@ -144,13 +143,15 @@ public class Server {
 	 * return false
 	 */
 	private boolean parseCommand(SelectableChannel channel) throws IOException {
-		String command = new String(readBuffer.array(), 0,
+		byte b[] = readBuffer.array();
+		String command = new String(b, 0,
 				readBuffer.position());
-		//System.out.println("Command : " + command);
+		System.out.println("Command : [" + command+"]"+b.length);
 		if (command.startsWith("/")) {
 			String[] words = command.split(" ");
 			switch (words[0]) {
 			case "/echo":
+				System.out.println(readBuffer.position());
 				this.pendingEcho.add(new Entry((SocketChannel) channel, Integer
 						.parseInt(words[1].trim())));
 				try {
@@ -174,7 +175,8 @@ public class Server {
 				System.out.println("Wrong command : " + command);
 				break;
 			}
-			this.readBuffer.clear();
+			this.readBuffer.position(words[0].length() + words[1].length());
+			System.out.println(readBuffer.position());
 			return true;
 		} else
 			return false;
