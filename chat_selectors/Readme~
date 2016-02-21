@@ -6,8 +6,7 @@ Execution 	: 	java Server
 
 
 
----------- ANALYSE DU TRAFFIC ---------- 
-
+Analyse du traffic : 
 - -> Demande de connexion
 - <- ACK de connexion
 - -> Envoi du /echo
@@ -17,7 +16,6 @@ Execution 	: 	java Server
 - -> ACK OK echo + FIN connexion
 - <- ACK FIN 
 - -> ACK ACK FIN
-
 
 Connexion : 2 messages
 Envoi de données : 4 messages
@@ -35,5 +33,5 @@ Conclusion : la connexion prend plus de bande passante que l'envoi d'un octet.
 
 
 
----------- OBSERVATIONS EXPERIMENTALES ----------
+Observations expérimentales :
 A compléter en cours.
