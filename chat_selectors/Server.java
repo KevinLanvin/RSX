@@ -9,6 +9,7 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+
 public class Server {
 	public final int port = 7654;
 	public static final int BUFFERSIZE = 2000001;
@@ -103,6 +104,7 @@ public class Server {
 			readBuffer.clear();
 		} catch (IOException e) {
 			//System.out.println("Client perdu");
+			channel.close();
 		}
 
 	}
@@ -121,8 +123,11 @@ public class Server {
 			}
 			entry.decrRemaining(size);
 			entry.output.put(tempBuffer.array(), tempBuffer.position()-size, tempBuffer.position());
+			tempBuffer.clear();
 		} catch (IOException e) {
 			//System.out.println("Client parti");
+			pendingEcho.remove(entry);
+			try { entry.channel.close();} catch (IOException exception){}
 		}
 	}
 
@@ -130,6 +135,7 @@ public class Server {
 	private void readAck(Entry entry) throws IOException {
 		tempBuffer.clear();
 		int size = entry.channel.read(tempBuffer);
+		tempBuffer.clear();
 		entry.decrRemaining(size);
 		// Ici on force l'écriture si l'entry a fini de lire (pas bien)
 		if (entry.remaining <= 0) {
@@ -146,12 +152,11 @@ public class Server {
 		byte b[] = readBuffer.array();
 		String command = new String(b, 0,
 				readBuffer.position());
-		System.out.println("Command : [" + command+"]"+b.length);
+		System.out.println("Command : [" + command + "]");
 		if (command.startsWith("/")) {
 			String[] words = command.split(" ");
 			switch (words[0]) {
 			case "/echo":
-				System.out.println(readBuffer.position());
 				this.pendingEcho.add(new Entry((SocketChannel) channel, Integer
 						.parseInt(words[1].trim())));
 				try {
@@ -159,6 +164,7 @@ public class Server {
 							.getBytes()));
 				} catch (IOException e) {
 					//System.out.println("Parti parce qu'il a fini");
+					channel.close();
 				}
 				break;
 			case "/ack":
@@ -169,6 +175,7 @@ public class Server {
 							.getBytes()));
 				} catch (IOException e) {
 					//System.out.println("Parti parce qu'il a fini");
+					channel.close();
 				}
 				break;
 			default:
@@ -176,7 +183,6 @@ public class Server {
 				break;
 			}
 			this.readBuffer.position(words[0].length() + words[1].length());
-			System.out.println(readBuffer.position());
 			return true;
 		} else
 			return false;
@@ -185,11 +191,8 @@ public class Server {
 	/* Diffuse the message to all channels */
 	private void resendMessage(int size) throws IOException {
 		for (SelectionKey sk : selector.keys())
-			if (sk.attachment() != null) {
-				((ByteBuffer) sk.attachment()).clear();
-				((ByteBuffer) sk.attachment()).put(readBuffer.array(), 0,
-						size - 1);
-			}
+			if (sk.attachment() != null) 
+				((ByteBuffer) sk.attachment()).put(readBuffer.array(), readBuffer.position()-size,readBuffer.position());
 	}
 
 	/* Writes to a client */
@@ -207,6 +210,7 @@ public class Server {
 			((SocketChannel) sk.channel()).write((ByteBuffer) sk.attachment());
 		} catch (IOException e) {
 			//System.out.println("Il est parti");
+			sk.channel().close();
 		}
 		((ByteBuffer) sk.attachment()).clear();
 	}
@@ -218,7 +222,8 @@ public class Server {
 			e.channel.write(e.output);
 		} catch (IOException ex) {
 			//System.out.println("Il a pas attendu");
-			return;
+			pendingEcho.remove(e);
+			e.channel.close();
 		}
 		e.output.clear();
 		if (e.remaining <= 0) {
@@ -238,6 +243,7 @@ public class Server {
 			e.channel.write(buffer);
 		} catch (IOException ex) {
 			//System.out.println("Bah le mec il attend meme pas que ca soit ok");
+			try{ e.channel.close();}catch (IOException exception){}
 		}
 	}
 }

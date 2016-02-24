@@ -1,6 +1,6 @@
 Compilation : make
 Execution 	: 	java Server
-				java Client > times
+			java Client -begin <interval start> -end <interval end> -step <step> -size <nbSentOctets>
 
 
 
