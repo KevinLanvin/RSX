@@ -152,7 +152,6 @@ public class Server {
 		byte b[] = readBuffer.array();
 		String command = new String(b, 0,
 				readBuffer.position());
-		System.out.println("Command : [" + command + "]");
 		if (command.startsWith("/")) {
 			String[] words = command.split(" ");
 			switch (words[0]) {

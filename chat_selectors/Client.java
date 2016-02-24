@@ -63,9 +63,9 @@ public class Client {
 	public static void main(String[] args) throws UnknownHostException,
 			IOException {
 		int begin = 1;
-		int end = 65536;
-		int step = 2;
-		int size = 65536;	
+		int end = 10002;
+		int step = 200;
+		int size = 10000;	
 		for (int i = 0; i < args.length; ++i) {
 			switch (args[i]) {
 			case "-begin":
@@ -83,11 +83,16 @@ public class Client {
 				break;
 			}
 		}
-		for (int i = begin; i < end; i *= step) {
-			long beginTime = System.currentTimeMillis();
-			Client.sendBytes(size, i);
-			long endTime = System.currentTimeMillis();
-			System.out.println(i + "\t" + (size / ((endTime - beginTime))));
+		for (int i = begin; i < end; i += step) {
+			int time = 0;
+			for(int j=0;i<20;++j){
+				long beginTime = System.currentTimeMillis();
+				Client.sendBytes(size, i);
+				long endTime = System.currentTimeMillis();
+				time += endTime - beginTime;
+			}
+			time /= 20;
+			System.out.println(i + "\t" + ((size / (time)))*1000/1024);
 		}
 	}
 }

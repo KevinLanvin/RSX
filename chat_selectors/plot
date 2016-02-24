@@ -2,7 +2,7 @@ set title "Evolution of CPU time used with increasing amount of data"
 set xrange [1:32768]
 set xlabel "Size of packets sent"
 set yrange [1:4000]
-set ylabel "Debit (o/ms)"
+set ylabel "Debit (ko/s)"
 set terminal svg enhanced background rgb 'white' fname 'graph'
 set output 'graph'
 
