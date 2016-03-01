@@ -67,11 +67,11 @@ public class Client {
 
 	public static void main(String[] args) throws UnknownHostException,
 			IOException {
-		int begin = 1;
-		int end = 10000;
-		int step = 100;
+		int begin = 2000;
+		int end = 3000;
+		int step = 1;
 		int size = 10000;
-		int nbExp = 10;
+		int nbExp = 20;
 		long results [] [] = new long [(end-begin+1)/step] [nbExp];
 		for (int i = 0; i < args.length; ++i) {
 			switch (args[i]) {
