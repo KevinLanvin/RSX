@@ -1,0 +1,33 @@
+Connexion en telnet aux équipements.
+
+
+
+- ajout d'un mot de passe pour le mode enable : 
+	enable secret password		(le mot de passe choisi est password)
+- activation des liaisons séries virtuelles (vty) :
+	line vty 0 15
+- ajout d'un mot de passe pour la connexion telnet :
+	password bonjour
+	login
+- ajout de l'adresse IP sur le switch : 
+	interface vlan1
+	ip address 10.1.1.1 255.255.255.0
+- configuration de l'adresse ip de eth1 dans le même réseau que le switch :
+	sudo ifconfig eth1 10.1.1.2 netmask 255.255.255.0
+
+Le mot de passe telnet circule en clair sur le réseau.
+On peut utiliser ssh à la place si le matériel est suffisamment récent.
+Ici, show version ne comporte pas la mention K9 , le matériel utilisé ne supporte pas la cryptographie.
+
+
+
+========================================================================================
+
+
+
+Sauvegarde.
+
+La commande copy permet de copier un fichier. 
+On l'utilise pour copier l'image IOS dans tftp:.
+On nous demande alors un hôte (adresse ip de l'interface eth1 configurée plus tôt) et un nom de fichier de destination.
+On peut alors récupérer la sauvegarde en ~/tftp
