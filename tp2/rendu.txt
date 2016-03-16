@@ -65,3 +65,13 @@ Il faut bloquer toutes les interfaces qui permettent une boucle sur l'un des swi
 Question 4.
 Il faut le configurer correctement pour empêcher les tempêtes mais ne pas trop brider le broadcast pour ne pas ralentir le réseau.
 
+
+
+PARTIE 4: BRIDGE LINUX
+
+- brctl addbr bridge
+- addif bridge eth0
+- addif bridge eth1
+- ifconfig bridge 10.1.1.10 netmask 255.255.255.0 up
+
+
