@@ -1,0 +1,19 @@
+Question 1. 
+C reçoit un paquet de ping chaque fois que l'on change B de port. Il faut que le switch recoive un paquet de B pour pouvoir l'associer à l'un de ses ports.
+
+
+Question 2.
+Quand il reçoit une trame vers une adresse inconnue, le switch renvoie le paquet sur tous les ports.
+
+Question 3.
+- Le switch a oublié sur quel port était B, et renvoie donc le ping sur tous les ports.
+- Cela ne se produit que 10 secondes après le dernier paquet envoyé par B. Comme B répond aux pings continus, cela ne se produit plus.
+- Une trop courte durée entraine donc une surchage du réseau.
+- Si le temps est trop long, on peut transformer le switch en hub en le spammant de nouvelles adresses jusqu'à ce que sa table de commutation soit pleine.
+
+Question 4.
+Le dernier qui a envoyé un paquet est celui qui est enregistré pour cette adresse dans la table de commutation. La table ne peut avoir qu'une seule entrée avec la même adresse MAC.
+
+Question 5.
+On ne constate rien. Les switchs ne se reconnaissent pas entre eux. Impossible de pinger B depuis A ou C
+
