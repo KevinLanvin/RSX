@@ -1,3 +1,10 @@
+TP2 LAN
+Kevin Lanvin
+
+
+
+PARTIE 1: COMMUTATION
+
 Question 1. 
 C reçoit un paquet de ping chaque fois que l'on change B de port. Il faut que le switch recoive un paquet de B pour pouvoir l'associer à l'un de ses ports.
 
@@ -17,3 +24,23 @@ Le dernier qui a envoyé un paquet est celui qui est enregistré pour cette adre
 Question 5.
 On ne constate rien. Les switchs ne se reconnaissent pas entre eux. Impossible de pinger B depuis A ou C
 
+
+PARTIE 2: Securisation des ports
+
+Question 1.
+Commande: security-max-count 2
+Seules 2 machines peuvent se connecter sur un port.
+Si une troisième essaie de s'y brancher, il est impossible de lui envoyer un ping.
+En revanche, les deux premières sont bien accessibles sur le réseau quand elles se branchent à ce port.
+
+Question 2.
+Il suffit de changer son adresse MAC et de mettre une adresse autorisée pour que le switch nous laisse passer. La sécurité ne tient pas face à quelqu'un qui sait changer son adresse MAC.
+
+Question 3.
+
+Question 4.
+
+Question 5.
+
+
+PARTIE 3: BOUCLES DE COMMUTATION
