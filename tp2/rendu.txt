@@ -25,6 +25,7 @@ Question 5.
 On ne constate rien. Les switchs ne se reconnaissent pas entre eux. Impossible de pinger B depuis A ou C
 
 
+
 PARTIE 2: Securisation des ports
 
 Question 1.
@@ -43,4 +44,24 @@ Question 4.
 Question 5.
 
 
+
 PARTIE 3: BOUCLES DE COMMUTATION
+
+Question 1.
+Une infinité de paquets ICMP est capturée.
+Le premier switch renvoie en effet tous le paquet sur tous les ports (y compris les ports du switch 2).
+Le switch 2 renvoie alors le paquets sur tous les autres ports (donc sur le switch1) et ainsi de suite.
+Il devient impossible d'entrer des commandes sur les terminaux virtuels.
+
+Question 2.
+On observe encore une boucle de commutation. Le trafic unicast vers une ip inconnue et inexistante produit le même effet. Personne ne répond à la requête et le paquet est donc retransmis en boucle entre les deux switches.
+
+Question 3.
+On observe 52912,885 paquets/s avec la capture de la question 2.
+Bloquer sur un seul port ne suffit pas. En effet le paquet est retransmis 2 fois à l'autre switch puisqu'il y a 2 connexions entre eux.
+Il faut donc activer le bloquage dans les deux sens.
+Il faut bloquer toutes les interfaces qui permettent une boucle sur l'un des switches.
+
+Question 4.
+Il faut le configurer correctement pour empêcher les tempêtes mais ne pas trop brider le broadcast pour ne pas ralentir le réseau.
+
